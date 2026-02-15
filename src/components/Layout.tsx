@@ -5,11 +5,13 @@ import {
   Briefcase,
   Users,
   Download,
+  Upload,
   Menu,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { exportCSV, exportAllData } from '../store';
+import CSVImportModal from './CSVImportModal';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'ダッシュボード' },
@@ -20,6 +22,20 @@ const navItems = [
 
 export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const importedRef = useRef(false);
+
+  const handleImported = () => {
+    importedRef.current = true;
+  };
+
+  const handleImportClose = () => {
+    setImportModalOpen(false);
+    if (importedRef.current) {
+      importedRef.current = false;
+      window.location.reload();
+    }
+  };
 
   const handleExportCSV = () => {
     const csv = exportCSV();
@@ -87,6 +103,13 @@ export default function Layout() {
 
         <div className="p-4 border-t border-gray-200 space-y-1">
           <button
+            onClick={() => setImportModalOpen(true)}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors w-full"
+          >
+            <Upload className="w-5 h-5" />
+            CSV取込
+          </button>
+          <button
             onClick={handleExportCSV}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors w-full"
           >
@@ -117,6 +140,13 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+      {/* CSV Import Modal */}
+      {importModalOpen && (
+        <CSVImportModal
+          onClose={handleImportClose}
+          onImported={handleImported}
+        />
+      )}
     </div>
   );
 }
